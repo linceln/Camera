@@ -37,7 +37,11 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d("camera", "surfaceChanged");
+        Log.d("camera", "surfaceChanged  width: " + width + " height: " + height);
+//        Camera camera = CameraHelper.getInstance().getCamera();
+//        Camera.Parameters parameters = camera.getParameters();
+//        parameters.setPreviewSize(width, height);
+//        camera.setParameters(parameters);
     }
 
     @Override

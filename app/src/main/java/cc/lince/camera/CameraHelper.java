@@ -1,5 +1,6 @@
 package cc.lince.camera;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -42,17 +43,22 @@ public class CameraHelper {
         mCamera.startPreview();
     }
 
+    public void capture(final Context context, Camera.PictureCallback pictureCallback) {
+        checkCamera();
+        mCamera.takePicture(null, null, pictureCallback);
+    }
+
     public void releaseCamera() {
         checkCamera();
-        mCamera.stopPreview();
+//        mCamera.stopPreview();
         mCamera.release();
     }
 
     /**
      * 设置画面的旋转角度
      *
-     * @param cameraId
-     * @param camera
+     * @param cameraId 摄像头
+     * @param camera   {@link Camera}
      */
     private void setCameraDisplayOrientation(int cameraId, Camera camera) {
         checkCamera();
