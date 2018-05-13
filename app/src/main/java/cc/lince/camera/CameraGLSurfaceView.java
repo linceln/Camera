@@ -56,7 +56,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                 // 有可用的帧数据，调用 requestRender 通知 Render 回调 onDrawFrame 开始绘制
                 requestRender();
-                Log.e(TAG, "SurfaceTexture onFrameAvailable and requestRender " + Thread.currentThread().getName());
+                Log.e(TAG, "SurfaceTexture onFrameAvailable and requestRender. Thread" + Thread.currentThread().getName());
             }
         });
         if (mListener != null) {
@@ -125,10 +125,11 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
                     @Override
                     public void onPreviewFrame(byte[] data, Camera camera) {
-                        // 在 SurfaceTexture 的 OnFrameAvailable 之后回调
+                        // 在 SurfaceTexture 的 OnFrameAvailable 之后回调 主线程
                         Log.e(TAG, "Camera onPreviewFrame callback: data length:" + data.length
                                 + ". Thread: " + Thread.currentThread().getName());
                         camera.addCallbackBuffer(data);
+                        // TODO 开新线程处理数据
                     }
                 });
                 mCamera.startPreview();
