@@ -21,7 +21,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     private SurfaceTexture mSurfaceTexture;
     private DirectDrawer mDirectDrawer;
-    private OnSurfaceCreatedListener mListener;
+    private OnSurfaceTextureCreated mListener;
     private Camera mCamera;
 
     public CameraGLSurfaceView(Context context) {
@@ -39,13 +39,34 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         this.setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
-    public void setOnSurfaceCreatedListener(OnSurfaceCreatedListener listener) {
+    public void setOnSurfaceTextureCreatedListener(OnSurfaceTextureCreated listener) {
         mListener = listener;
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         Log.e(TAG, "Renderer onSurfaceCreated START. Thread" + Thread.currentThread().getName());
+        int oesTextureId = getOESTextureId();
+        // 创建 Shader
+        mDirectDrawer = new DirectDrawer(oesTextureId);
+        // 创建一个 SurfaceTexture 绑定到 openGL 外部 OES 纹理
+        mSurfaceTexture = new SurfaceTexture(oesTextureId);
+        mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+            @Override
+            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                // 有可用的帧数据，调用 requestRender 通知 Render 回调 onDrawFrame 开始绘制
+                requestRender();
+                Log.e(TAG, "SurfaceTexture onFrameAvailable and requestRender " + Thread.currentThread().getName());
+            }
+        });
+        if (mListener != null) {
+            // 通知外部 SurfaceTexture 已经创建完成，可以开启摄像头或者其他操作了
+            mListener.onSurfaceTextureCreated(mSurfaceTexture);
+        }
+        Log.e(TAG, "Renderer onSurfaceCreated END");
+    }
+
+    private int getOESTextureId() {
         int[] textureId = new int[1];
         // 生成一个纹理
         GLES20.glGenTextures(textureId.length, textureId, 0);
@@ -62,22 +83,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
         // 解除纹理绑定
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_BINDING_EXTERNAL_OES, 0);
-
-        // 创建一个 SurfaceTexture 绑定到 openGL 外部 OES 纹理
-        mSurfaceTexture = new SurfaceTexture(textureId[0]);
-        mDirectDrawer = new DirectDrawer(textureId[0]);
-        mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
-            @Override
-            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                requestRender();
-                Log.e(TAG, "SurfaceTexture onFrameAvailable and requestRender " + Thread.currentThread().getName());
-            }
-        });
-
-        if (mListener != null) {
-            mListener.onSurfaceCreated(mSurfaceTexture);
-        }
-        Log.e(TAG, "Renderer onSurfaceCreated END");
+        return textureId[0];
     }
 
     @Override
@@ -152,7 +158,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return new byte[bufferSize];
     }
 
-    public interface OnSurfaceCreatedListener {
-        void onSurfaceCreated(SurfaceTexture surfaceTexture);
+    public interface OnSurfaceTextureCreated {
+        void onSurfaceTextureCreated(SurfaceTexture surfaceTexture);
     }
 }

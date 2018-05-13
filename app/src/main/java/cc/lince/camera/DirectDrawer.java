@@ -56,11 +56,11 @@ public class DirectDrawer {
             0.0f, 0.0f,
     };
 
-    private int texture;
+    private int textureId;
 
-    public DirectDrawer(int texture)
+    public DirectDrawer(int textureId)
     {
-        this.texture = texture;
+        this.textureId = textureId;
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(squareCoords.length * 4);
         bb.order(ByteOrder.nativeOrder());
@@ -95,7 +95,7 @@ public class DirectDrawer {
         GLES20.glUseProgram(mProgram);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texture);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
 
         // get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");

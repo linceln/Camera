@@ -22,9 +22,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         glSurfaceView = new CameraGLSurfaceView(this);
         setContentView(glSurfaceView);
-        glSurfaceView.setOnSurfaceCreatedListener(new CameraGLSurfaceView.OnSurfaceCreatedListener() {
+        glSurfaceView.setOnSurfaceTextureCreatedListener(new CameraGLSurfaceView.OnSurfaceTextureCreated() {
             @Override
-            public void onSurfaceCreated(SurfaceTexture surfaceTexture) {
+            public void onSurfaceTextureCreated(SurfaceTexture surfaceTexture) {
                 requestPermissionOrOpenCamera();
             }
         });
