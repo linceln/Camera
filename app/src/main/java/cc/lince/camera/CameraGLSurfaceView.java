@@ -15,7 +15,7 @@ import java.io.IOException;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
+public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, Camera.PreviewCallback {
 
     private static final String TAG = "CameraGLSurfaceView";
 
@@ -108,12 +108,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         Log.e(TAG, "Renderer onDrawFrame END");
     }
 
-    public void stopPreview() {
-        if (mCamera != null) {
-            mCamera.stopPreview();
-        }
-    }
-
     public void startPreview() {
         if (mSurfaceTexture != null) {
             mCamera = Camera.open();
@@ -122,16 +116,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 mCamera.addCallbackBuffer(allocBuffer());
                 mCamera.addCallbackBuffer(allocBuffer());
                 mCamera.addCallbackBuffer(allocBuffer());
-                mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
-                    @Override
-                    public void onPreviewFrame(byte[] data, Camera camera) {
-                        // 在 SurfaceTexture 的 OnFrameAvailable 之后回调 主线程
-                        Log.e(TAG, "Camera onPreviewFrame callback: data length:" + data.length
-                                + ". Thread: " + Thread.currentThread().getName());
-                        camera.addCallbackBuffer(data);
-                        // TODO 开新线程处理数据
-                    }
-                });
+                mCamera.setPreviewCallbackWithBuffer(this);
                 mCamera.startPreview();
                 Log.e(TAG, "Camera start previewing");
             } catch (IOException e) {
@@ -139,6 +124,27 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             }
         } else {
             Log.e(TAG, "Open camera failed: SurfaceTexture not ready");
+        }
+    }
+
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+        // 在 SurfaceTexture 的 OnFrameAvailable 之后回调 主线程
+        Log.e(TAG, "Camera onPreviewFrame callback: data length:" + data.length
+                + ". Thread: " + Thread.currentThread().getName());
+        // TODO 开新线程处理数据
+        camera.addCallbackBuffer(data);
+    }
+
+    public void stopPreview() {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+        }
+    }
+
+    public void closeCamera() {
+        if (mCamera != null) {
+            mCamera.release();
         }
     }
 

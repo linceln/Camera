@@ -64,4 +64,10 @@ public class MainActivity extends AppCompatActivity {
         glSurfaceView.onPause();
         glSurfaceView.stopPreview();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        glSurfaceView.closeCamera();
+    }
 }
